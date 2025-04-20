@@ -26,6 +26,8 @@ jobs:
       - uses: jfrog/setup-jfrog-cli@v4
         name: Setup JFrog CLI
         id: setup-cli
+        with:
+          version 2.7.3
         # with:
         #     oidc-provider-name: guy-github
       
