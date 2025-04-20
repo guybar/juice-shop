@@ -13,7 +13,7 @@ jobs:
       JF_PROJECT: ${{ vars.JF_PROJECT_KEY }}
       JF_URL: ${{ vars.JF_URL }}
       # JFROG_CLI_LOG_LEVEL: DEBUG
-      # DOCKER_IMAGE_NAME: ${{ vars.JF_DOCKER_REPOSITORY }}npm-sample-docker:1.0.${{github.run_number}}
+      DOCKER_IMAGE_NAME: ${{ vars.JF_DOCKER_REPOSITORY }}juice-shop:1.0.${{github.run_number}}
 
     steps:
       # This action checks out the code from the repository
@@ -31,17 +31,30 @@ jobs:
             oidc-provider-name: guy-github
       
       # Configure JFrog CLI for NPM 
-      - run: |
+      - name: Configure NPM
+        run: |
           jf npmc --repo-deploy=guy-npm-dev --repo-resolve=guy-npm-dev
-      - run: |
+      - name: Install npm dependencies
+        run: |
           npm install
           jf npm install 
       # Using NPM Publish to uplaod the NPM Build 
-      - run: |
+      - name: build & publish npm package
+        run: |
           jf npm publish 
       # Scan the NPM Build with Xray 
-      - run: |
+      - name: scan npm build
+        run: |
            jf build-scan 
+      # Build and Push docker image
+      - name: docker build and push 
+        run: |
+          docker build -t $DOCKER_IMAGE_NAME .
+          jf docker push $DOCKER_IMAGE_NAME
+      # Scan docker image
+      - name: Scan docker
+        run: |
+          jf docker scan $DOCKER_IMAGE_NAME
       # Promote the Build from Dev to Production 
       # - run: |
       #    jf rt build-promote --status=production
