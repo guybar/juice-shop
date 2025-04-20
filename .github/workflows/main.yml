@@ -27,7 +27,7 @@ jobs:
         name: Setup JFrog CLI
         id: setup-cli
         with:
-          version 2.7.3
+          version: 2.7.3
         # with:
         #     oidc-provider-name: guy-github
       
