@@ -24,9 +24,6 @@ jobs:
       - uses: jfrog/setup-jfrog-cli@v4
         name: Setup JFrog CLI
         id: setup-cli
-        env:
-          JF_URL: ${{ vars.JF_URL }}
-          JF_PROJECT: ${{ vars.JF_PROJECT_KEY }}
         with:
             oidc-provider-name: guy-github
       
@@ -36,7 +33,6 @@ jobs:
           jf npmc --repo-deploy=guy-npm-dev --repo-resolve=guy-npm-dev
       - name: Install npm dependencies
         run: |
-          npm install
           jf npm install 
       # Using NPM Publish to uplaod the NPM Build 
       - name: build & publish npm package
