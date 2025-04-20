@@ -33,7 +33,7 @@ jobs:
       # Configure JFrog CLI for NPM 
       - name: Configure NPM
         run: |
-          jf npmc --repo-deploy=guy-npm-dev --repo-resolve=guy-npm-dev
+          jf npmc --repo-deploy=guy-npm-dev-local --repo-resolve=guy-npm-remote
       - name: Install npm dependencies
         run: |
           # npm install
