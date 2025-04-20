@@ -10,8 +10,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      # JF_PROJECT: ${{ vars.JF_PROJECT_KEY }}
+      JF_PROJECT: ${{ vars.JF_PROJECT_KEY }}
       JF_URL: ${{ vars.JF_URL }}
+      JF_USER: guy-admin
+      JF_PASSWORD: MyJFrog2022~
       JFROG_CLI_LOG_LEVEL: DEBUG
       DOCKER_IMAGE_NAME: ${{ vars.JF_DOCKER_REPOSITORY }}juice-shop:1.0.${{github.run_number}}
 
@@ -24,8 +26,8 @@ jobs:
       - uses: jfrog/setup-jfrog-cli@v4
         name: Setup JFrog CLI
         id: setup-cli
-        with:
-            oidc-provider-name: guy-github
+        # with:
+        #     oidc-provider-name: guy-github
       
       # Configure JFrog CLI for NPM 
       - name: Configure NPM
