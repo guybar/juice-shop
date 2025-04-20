@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      JF_PROJECT: ${{ vars.JF_PROJECT_KEY }}
+      # JF_PROJECT: ${{ vars.JF_PROJECT_KEY }}
       JF_URL: ${{ vars.JF_URL }}
       JFROG_CLI_LOG_LEVEL: DEBUG
       DOCKER_IMAGE_NAME: ${{ vars.JF_DOCKER_REPOSITORY }}juice-shop:1.0.${{github.run_number}}
