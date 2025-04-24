@@ -43,10 +43,6 @@ jobs:
       - name: build & publish npm package
         run: |
           jf npm publish 
-      # Scan the NPM Build with Xray 
-      - name: scan npm build
-        run: |
-           jf build-scan 
       # Build and Push docker image
       - name: docker build and push 
         run: |
@@ -56,6 +52,11 @@ jobs:
       - name: Scan docker
         run: |
           jf docker scan $DOCKER_IMAGE_NAME --watches "Juice_Shopp_Watch"
+      # Scan the NPM Build with Xray 
+      - name: scan npm build
+        run: |
+          jf build-publish
+          jf build-scan 
       # Promote the Build from Dev to Production 
       # - run: |
       #    jf rt build-promote --status=production
