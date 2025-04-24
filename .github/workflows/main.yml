@@ -55,7 +55,7 @@ jobs:
       # Scan the NPM Build with Xray 
       - name: scan npm build
         run: |
-          jf build-publish
+          jf rt build-publish
           jf build-scan 
       # Promote the Build from Dev to Production 
       # - run: |
