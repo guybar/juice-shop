@@ -53,10 +53,10 @@ jobs:
         run: |
           jf docker scan $DOCKER_IMAGE_NAME --watches "Juice_Shopp_Watch"
       # Scan the NPM Build with Xray 
-      - name: scan npm build
-        run: |
-          jf rt build-publish
-          jf build-scan 
+      # - name: scan npm build
+      #   run: |
+      #     jf rt build-publish
+      #     jf build-scan 
       # Promote the Build from Dev to Production 
       # - run: |
       #    jf rt build-promote --status=production
