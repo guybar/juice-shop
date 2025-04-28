@@ -30,6 +30,6 @@ jobs:
             JF_URL: ${{ vars.JF_URL }}
             JF_GIT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             JF_GIT_BASE_BRANCH: ${{ matrix.branch }}    # For repository scan action
-            # JF_INSTALL_DEPS_CMD: npm i --legacy-peer-deps
+            JF_INSTALL_DEPS_CMD: npm i --legacy-peer-deps
         with:
             oidc-provider-name: guy-github
