@@ -33,7 +33,7 @@ jobs:
           jf npmc --repo-deploy=guy-npm-dev --repo-resolve=guy-npm-dev 
       - name: Install npm dependencies
         run: |
-          # npm install
+          npm install
           jf npm install --legacy-peer-deps
       # Scan code
       - name: scan code
