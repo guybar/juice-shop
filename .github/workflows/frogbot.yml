@@ -32,6 +32,6 @@ jobs:
             JF_GIT_BASE_BRANCH: ${{ matrix.branch }}    # For repository scan action
             JF_INSTALL_DEPS_CMD: npm i --legacy-peer-deps
             # CI: true
-            JFROG_CLI_LOG_LEVEL: DEBUG
+            # JFROG_CLI_LOG_LEVEL: DEBUG
         with:
             oidc-provider-name: guy-github
