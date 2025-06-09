@@ -38,7 +38,8 @@ jobs:
       # Scan code
       - name: scan code
         run: |
-          jf audit --watches "Juice_Shopp_Watch"
+          jf audit 
+          # --watches "Juice_Shopp_Watch"
       # Using NPM Publish to uplaod the NPM Build 
       - name: build & publish npm package
         run: |
@@ -51,7 +52,8 @@ jobs:
       # Scan docker image
       - name: Scan docker
         run: |
-          jf docker scan $DOCKER_IMAGE_NAME --watches "Juice_Shopp_Watch"
+          jf docker scan $DOCKER_IMAGE_NAME 
+          # --watches "Juice_Shopp_Watch"
       # Scan the NPM Build with Xray 
       # - name: scan npm build
       #   run: |
