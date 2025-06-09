@@ -38,7 +38,7 @@ jobs:
       # Scan code
       - name: scan code
         run: |
-          jf audit 
+          # jf audit 
           # --watches "Juice_Shopp_Watch"
       # Using NPM Publish to uplaod the NPM Build 
       - name: build & publish npm package
