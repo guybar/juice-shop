@@ -51,7 +51,7 @@ jobs:
       # Scan npm package
       - name: Scan npm package
         run: |
-          jf scan 
+          jf scan juice-shop/
       # Build and Push docker image
       - name: Docker build and push 
         run: |
