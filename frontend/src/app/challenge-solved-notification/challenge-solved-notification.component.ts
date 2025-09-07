@@ -8,13 +8,14 @@ import { ChallengeService } from '../Services/challenge.service'
 import { ConfigurationService } from '../Services/configuration.service'
 import { ChangeDetectorRef, Component, NgZone, type OnInit } from '@angular/core'
 import { CookieService } from 'ngy-cookie'
-import { CountryMappingService } from 'src/app/Services/country-mapping.service'
+import { CountryMappingService } from '../Services/country-mapping.service'
 import { SocketIoService } from '../Services/socket-io.service'
 import { ClipboardModule } from 'ngx-clipboard'
 import { MatIconModule } from '@angular/material/icon'
 import { MatButtonModule } from '@angular/material/button'
 import { MatCardModule } from '@angular/material/card'
-import { NgFor, NgIf, LowerCasePipe } from '@angular/common'
+import { LowerCasePipe } from '@angular/common'
+import { firstValueFrom } from 'rxjs'
 
 interface ChallengeSolvedMessage {
   challenge: string
@@ -25,6 +26,7 @@ interface ChallengeSolvedMessage {
 }
 
 interface ChallengeSolvedNotification {
+  key: string
   message: string
   flag: string
   country?: { code: string, name: string }
@@ -35,8 +37,7 @@ interface ChallengeSolvedNotification {
   selector: 'app-challenge-solved-notification',
   templateUrl: './challenge-solved-notification.component.html',
   styleUrls: ['./challenge-solved-notification.component.scss'],
-  standalone: true,
-  imports: [NgFor, MatCardModule, MatButtonModule, MatIconModule, ClipboardModule, NgIf, LowerCasePipe, TranslateModule]
+  imports: [MatCardModule, MatButtonModule, MatIconModule, ClipboardModule, LowerCasePipe, TranslateModule]
 })
 export class ChallengeSolvedNotificationComponent implements OnInit {
   public notifications: ChallengeSolvedNotification[] = []
@@ -79,9 +80,12 @@ export class ChallengeSolvedNotificationComponent implements OnInit {
           this.showCtfCountryDetailsInNotifications = config.ctf.showCountryDetailsInNotifications
 
           if (config.ctf.showCountryDetailsInNotifications !== 'none') {
-            this.countryMappingService.getCountryMapping().subscribe((countryMap: any) => {
-              this.countryMap = countryMap
-            }, (err) => { console.log(err) })
+            this.countryMappingService.getCountryMapping().subscribe({
+              next: (countryMap: any) => {
+                this.countryMap = countryMap
+              },
+              error: (err) => { console.log(err) }
+            })
           }
         } else {
           this.showCtfCountryDetailsInNotifications = 'none'
@@ -103,30 +107,34 @@ export class ChallengeSolvedNotificationComponent implements OnInit {
   }
 
   showNotification (challenge: ChallengeSolvedMessage) {
-    this.translate.get('CHALLENGE_SOLVED', { challenge: challenge.challenge }).toPromise().then((challengeSolved) => challengeSolved,
-      (translationId) => translationId).then((message) => {
-      let country
-      if (this.showCtfCountryDetailsInNotifications && this.showCtfCountryDetailsInNotifications !== 'none') {
-        country = this.countryMap[challenge.key]
-      }
-      this.notifications.push({
-        message,
-        flag: challenge.flag,
-        country,
-        copied: false
+    firstValueFrom(this.translate.get('CHALLENGE_SOLVED', { challenge: challenge.challenge }))
+      .then((message) => {
+        let country
+        if (this.showCtfCountryDetailsInNotifications && this.showCtfCountryDetailsInNotifications !== 'none') {
+          country = this.countryMap[challenge.key]
+        }
+        this.notifications.push({
+          message,
+          key: challenge.key,
+          flag: challenge.flag,
+          country,
+          copied: false
+        })
+        this.ref.detectChanges()
       })
-      this.ref.detectChanges()
-    })
   }
 
   saveProgress () {
-    this.challengeService.continueCode().subscribe((continueCode) => {
-      if (!continueCode) {
-        throw (new Error('Received invalid continue code from the server!'))
-      }
-      const expires = new Date()
-      expires.setFullYear(expires.getFullYear() + 1)
-      this.cookieService.put('continueCode', continueCode, { expires })
-    }, (err) => { console.log(err) })
+    this.challengeService.continueCode().subscribe({
+      next: (continueCode) => {
+        if (!continueCode) {
+          throw (new Error('Received invalid continue code from the server!'))
+        }
+        const expires = new Date()
+        expires.setFullYear(expires.getFullYear() + 1)
+        this.cookieService.put('continueCode', continueCode, { expires })
+      },
+      error: (err) => { console.log(err) }
+    })
   }
 }

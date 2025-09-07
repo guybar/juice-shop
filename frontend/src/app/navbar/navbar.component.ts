@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: MIT
  */
 
+import { Component, EventEmitter, NgZone, type OnInit, Output } from '@angular/core'
 import { environment } from '../../environments/environment'
 import { ChallengeService } from '../Services/challenge.service'
 import { UserService } from '../Services/user.service'
 import { AdministrationService } from '../Services/administration.service'
 import { ConfigurationService } from '../Services/configuration.service'
-import { Component, EventEmitter, NgZone, type OnInit, Output } from '@angular/core'
 import { CookieService } from 'ngy-cookie'
 import { TranslateService, TranslateModule } from '@ngx-translate/core'
 import { Router, RouterLink } from '@angular/router'
@@ -16,6 +16,9 @@ import { SocketIoService } from '../Services/socket-io.service'
 import { LanguagesService } from '../Services/languages.service'
 import { MatSnackBar } from '@angular/material/snack-bar'
 import { BasketService } from '../Services/basket.service'
+import { FormsModule } from '@angular/forms'
+import { MatFormFieldModule } from '@angular/material/form-field'
+import { MatInputModule } from '@angular/material/input'
 
 import {
   faBomb,
@@ -44,14 +47,14 @@ import { LoginGuard } from '../app.guard'
 import { roles } from '../roles'
 import { MatDivider } from '@angular/material/divider'
 import { MatRadioButton } from '@angular/material/radio'
-import { NgIf, NgFor } from '@angular/common'
+
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu'
 import { MatSearchBarComponent } from '../mat-search-bar/mat-search-bar.component'
-import { ExtendedModule } from '@angular/flex-layout/extended'
+
 import { MatIconModule } from '@angular/material/icon'
 import { MatTooltip } from '@angular/material/tooltip'
 import { MatButtonModule } from '@angular/material/button'
-import { FlexModule } from '@angular/flex-layout/flex'
+
 import { MatToolbar, MatToolbarRow } from '@angular/material/toolbar'
 
 library.add(faLanguage, faSearch, faSignInAlt, faSignOutAlt, faComment, faBomb, faTrophy, faInfoCircle, faShoppingCart, faUserSecret, faRecycle, faMapMarker, faUserCircle, faGithub, faComments, faThermometerEmpty, faThermometerQuarter, faThermometerHalf, faThermometerThreeQuarters, faThermometerFull)
@@ -60,12 +63,30 @@ library.add(faLanguage, faSearch, faSignInAlt, faSignOutAlt, faComment, faBomb, 
   selector: 'app-navbar',
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss'],
-  standalone: true,
-  imports: [MatToolbar, FlexModule, MatToolbarRow, MatButtonModule, MatTooltip, MatIconModule, RouterLink, ExtendedModule, MatSearchBarComponent, MatMenuTrigger, MatMenu, NgIf, MatMenuItem, NgFor, MatRadioButton, TranslateModule, MatDivider]
+  imports: [
+    MatToolbar,
+    MatToolbarRow,
+    MatButtonModule,
+    MatTooltip,
+    MatIconModule,
+    RouterLink,
+    MatSearchBarComponent,
+    MatMenuTrigger,
+    MatMenu,
+    MatMenuItem,
+    MatRadioButton,
+    TranslateModule,
+    MatDivider,
+    MatFormFieldModule,
+    MatInputModule,
+    FormsModule
+  ]
 })
 export class NavbarComponent implements OnInit {
   public userEmail: string = ''
-  public languages: any = []
+  public languages: any[] = []
+  public filteredLanguages: any[] = []
+  public languageSearchQuery: string = ''
   public selectedLanguage: string = 'placeholder'
   public version: string = ''
   public applicationName: string = 'OWASP Juice Shop'
@@ -86,30 +107,36 @@ export class NavbarComponent implements OnInit {
   ngOnInit (): void {
     this.getLanguages()
     this.basketService.getItemTotal().subscribe(x => (this.itemTotal = x))
-    this.administrationService.getApplicationVersion().subscribe((version: any) => {
-      if (version) {
+    this.administrationService.getApplicationVersion().subscribe({
+      next: (version: any) => {
+        if (version) {
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        this.version = `v${version}`
-      }
-    }, (err) => { console.log(err) })
-
-    this.configurationService.getApplicationConfiguration().subscribe((config: any) => {
-      if (config?.application?.name) {
-        this.applicationName = config.application.name
-      }
-      if (config?.application) {
-        this.showGitHubLink = config.application.showGitHubLinks
-      }
-
-      if (config?.application?.logo) {
-        let logo: string = config.application.logo
-
-        if (logo.substring(0, 4) === 'http') {
-          logo = decodeURIComponent(logo.substring(logo.lastIndexOf('/') + 1))
+          this.version = `v${version}`
         }
-        this.logoSrc = 'assets/public/images/' + logo
-      }
-    }, (err) => { console.log(err) })
+      },
+      error: (err) => { console.log(err) }
+    })
+
+    this.configurationService.getApplicationConfiguration().subscribe({
+      next: (config: any) => {
+        if (config?.application?.name) {
+          this.applicationName = config.application.name
+        }
+        if (config?.application) {
+          this.showGitHubLink = config.application.showGitHubLinks
+        }
+
+        if (config?.application?.logo) {
+          let logo: string = config.application.logo
+
+          if (logo.substring(0, 4) === 'http') {
+            logo = decodeURIComponent(logo.substring(logo.lastIndexOf('/') + 1))
+          }
+          this.logoSrc = 'assets/public/images/' + logo
+        }
+      },
+      error: (err) => { console.log(err) }
+    })
 
     if (localStorage.getItem('token')) {
       this.getUserDetails()
@@ -136,6 +163,33 @@ export class NavbarComponent implements OnInit {
     })
   }
 
+  filterLanguages (): void {
+    if (!this.languageSearchQuery) {
+      this.filteredLanguages = [...this.languages]
+      return
+    }
+
+    const query = this.languageSearchQuery.toLowerCase()
+    this.filteredLanguages = this.languages.filter((lang: any) => {
+      // Filter by language name
+      if (lang.lang.toLowerCase().includes(query)) {
+        return true
+      }
+
+      // Filter by language key (e.g., 'en', 'fr', 'hi')
+      if (lang.key.toLowerCase().includes(query)) {
+        return true
+      }
+
+      // Filter by any additional language properties if needed
+      if (lang.shortKey?.toLowerCase()?.includes(query)) {
+        return true
+      }
+
+      return false
+    })
+  }
+
   checkLanguage () {
     if (this.cookieService.get('language')) {
       const langKey = this.cookieService.get('language')
@@ -159,9 +213,12 @@ export class NavbarComponent implements OnInit {
   }
 
   getUserDetails () {
-    this.userService.whoAmI().subscribe((user: any) => {
-      this.userEmail = user.email
-    }, (err) => { console.log(err) })
+    this.userService.whoAmI().subscribe({
+      next: (user: any) => {
+        this.userEmail = user.email
+      },
+      error: (err) => { console.log(err) }
+    })
   }
 
   isLoggedIn () {
@@ -169,7 +226,7 @@ export class NavbarComponent implements OnInit {
   }
 
   logout () {
-    this.userService.saveLastLoginIp().subscribe((user: any) => { this.noop() }, (err) => { console.log(err) })
+    this.userService.saveLastLoginIp().subscribe({ next: (user: any) => { this.noop() }, error: (err) => { console.log(err) } })
     localStorage.removeItem('token')
     this.cookieService.remove('token')
     sessionStorage.removeItem('bid')
@@ -198,11 +255,14 @@ export class NavbarComponent implements OnInit {
   }
 
   getScoreBoardStatus () {
-    this.challengeService.find({ name: 'Score Board' }).subscribe((challenges: any) => {
-      this.ngZone.run(() => {
-        this.scoreBoardVisible = challenges[0].solved
-      })
-    }, (err) => { console.log(err) })
+    this.challengeService.find({ name: 'Score Board' }).subscribe({
+      next: (challenges: any) => {
+        this.ngZone.run(() => {
+          this.scoreBoardVisible = challenges[0].solved
+        })
+      },
+      error: (err) => { console.log(err) }
+    })
   }
 
   goToProfilePage () {
@@ -221,8 +281,9 @@ export class NavbarComponent implements OnInit {
   noop () { }
 
   getLanguages () {
-    this.langService.getLanguages().subscribe((res) => {
+    this.langService.getLanguages().subscribe((res: any[]) => {
       this.languages = res
+      this.filteredLanguages = Array.isArray(res) ? [...res] : []
       this.checkLanguage()
     })
   }

@@ -16,7 +16,6 @@ library.add(faUserSlash, faHandPaper)
   selector: 'app-error-page',
   templateUrl: './error-page.component.html',
   styleUrls: ['./error-page.component.scss'],
-  standalone: true,
   imports: [MatCardModule]
 })
 export class ErrorPageComponent implements OnInit {
@@ -28,10 +27,13 @@ export class ErrorPageComponent implements OnInit {
   ngOnInit (): void {
     const errorKey = this.route.snapshot.queryParams.error
     if (errorKey) {
-      this.translate.get(errorKey).subscribe((errorMessage) => {
-        this.error = errorMessage
-      }, (translationId) => {
-        this.error = translationId
+      this.translate.get(errorKey).subscribe({
+        next: (errorMessage) => {
+          this.error = errorMessage
+        },
+        error: (translationId) => {
+          this.error = translationId
+        }
       })
     }
   }
