@@ -32,21 +32,28 @@ jobs:
       - name: Configure NPM
         run: |
           jf npmc --repo-deploy=guy-npm-dev --repo-resolve=guy-npm-dev 
+      # Curation audit
+      - name: Curate dependencies
+        run: |
+          jf curation-audit 
       - name: Install npm dependencies
         run: |
           npm install
           jf npm install --legacy-peer-deps
       # Scan code
-      - name: scan code
+      - name: Scan code
         run: |
           jf audit 
-          # --watches "Juice_Shopp_Watch"
       # Using NPM Publish to uplaod the NPM Build 
-      - name: build & publish npm package
+      - name: Build & Publish npm package
         run: |
           jf npm publish 
+      # Scan npm package
+      - name: Scan npm package
+        run: |
+          jf scan 
       # Build and Push docker image
-      - name: docker build and push 
+      - name: Docker build and push 
         run: |
           docker build -t $DOCKER_IMAGE_NAME .
           jf docker push $DOCKER_IMAGE_NAME
@@ -54,12 +61,8 @@ jobs:
       - name: Scan docker
         run: |
           jf docker scan $DOCKER_IMAGE_NAME 
-      #     --watches "Juice_Shopp_Watch"
       # Scan the NPM Build with Xray 
-      - name: scan build
+      - name: Scan build
         run: |
           jf rt build-publish
           jf build-scan 
-      # Promote the Build from Dev to Production 
-      # - run: |
-      #    jf rt build-promote --status=production
