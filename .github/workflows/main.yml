@@ -34,9 +34,9 @@ jobs:
         run: |
           jf npmc --repo-deploy=guy-npm-dev --repo-resolve=guy-npm-dev 
       # Curation audit
-      # - name: Curate dependencies
-      #   run: |
-      #     jf curation-audit 
+      - name: Curate dependencies
+        run: |
+          jf curation-audit 
       - name: Install npm dependencies
         run: |
           npm install
